@@ -1,0 +1,39 @@
+% Professor Lynd, from Lecture 5 (IVPs 2021), Slide 34
+% Example of Homogeneous Reactor Problem
+clear all
+% When given a set of reactions occurring in a batch reactor...
+% 1. Write CONCENTRATION OVER TIME BALANCE for each species in the reactor.
+% 2. Set the conditions-- incl initial conc each species, forward and back- 
+%    ward rate of each rxn.
+
+% In the script...
+% 1. Write a function emulating the interrelatedness of the dC(spec)/dt
+%    balances as a function of CONCENTRATION and TIME given the initial
+%    conditions (can set these as global 'assumptions').
+% 2. Use a solver method, such as "ode45," to convert the system of
+%    differential equations to a system of algebraic equations, and plot them.
+
+% 2. ... plot integrated (solved) system behavior given conditions.
+global k1 kb1 k2 kb2 k3 kb3 % MUST! MUST!! Declare GLOBAL in *BOTH* local contexts.
+k1 = 1; kb1 = 2; k2 = 2; kb2 = 2; k3 = 3; kb3 = 4;
+A = 1; B = 2; C = 3; D = 4; % Enumeration.
+c0(A) = .5; c0(D) = .5; c0(B) = 0.; c0(C) = 0.;
+tspan = [0 10];
+[t,c] = ode45(@reaction,tspan,c0);
+t(:)
+c(:,A)
+% Plot the action.
+clf
+hold on
+plot(t(:),c(:,A),'-b',t(:),c(:,B),'-r',t(:),c(:,C),'-n',t(:),c(:,A),'-');
+
+% 1. ... write function representing system of differential equations.
+function dcdt = reaction(t,c)
+global k1 kb1 k2 kb2 k3 kb3
+A = 1; B = 2; C = 3; D = 4; % Enumeration of index variable. Makes life easier.
+dcdt(A) = -k1*c(A)+kb1*c(B);
+dcdt(B) = k1*c(A)-kb1*c(B)+kb2*c(C)-k2*c(B);
+dcdt(C) = k2*c(B)+kb3*c(D)-kb2*c(C)-k3*c(C);
+dcdt(D) = k3*c(C)-kb3*c(D);
+dcdt = dcdt'; % Transpose default row vector to column vector for later use.
+end

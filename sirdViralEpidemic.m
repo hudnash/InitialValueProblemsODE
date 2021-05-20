@@ -1,0 +1,39 @@
+% "S-I-R-D" Viral Epidemic Model (using ODE system)
+
+% Objective:
+% Simulate a viral epidemic with a POPULATION BALANCE of...
+% S- Susceptible persons,     I- Infected persons,
+% R- Recovered persons,       D- Dead persons.
+% Given dpdt(S), dpdt(S), dpdt(S), dpdt(S) differential population balances
+% and kI, kR, kD rate constants, plot the progression of the epidemic.
+clear all
+clf
+
+% Define initial and system conditions:
+global kI kR kD % Infection, recovery, and death rates
+% system properties ("reaction rate constants"):
+kI = 1.4e-7;  % infected  /person/day of total population --> the # infected.
+kR = 7.14e-2; % recovered /day        out of the # infected.
+kD = 1.0e-5;  % dead      /day        out of the # infected.
+% initial values:
+S = 1; I = 2; R = 3; D = 4;                      % Austin had 900,000 people.
+p0(S) = 900000; p0(I) = 1; p0(R) = 0; p0(D) = 0; % *Enter* Patient ZERO.
+
+% Run integration algorithm (RK4/RK5 via "ODE45" built-in solver):
+[t,p]=ode45(@sirdModel,[0 400],p0)
+
+% Plot the implications of the differential system relationship:
+plot(t,p(:,S),'-r',t,p(:,I),'-b',t,p(:,R),'-g',t,p(:,D),'-k');
+legend('Austin Unexposed Population (S)','# Infected (I)','# Survived (R)','Total Deaths (D)');
+xlabel('Time, t [days]'); ylabel('Head Count, p [# persons]');
+
+% Write the SIRD population balance model:
+function dpdt = sirdModel(t,p)
+global kI kR kD
+S = 1; I = 2; R = 3; D = 4;
+dpdt(S) = -kI*p(S)*p(I);
+dpdt(I) = kI*p(S)*p(I)-kR*p(I)-kD*p(I);
+dpdt(R) = kR*p(I);
+dpdt(D) = kD*p(I);
+dpdt = dpdt';
+end
